@@ -84,3 +84,15 @@ class Discriminator(chainer.Chain):
         h = F.leaky_relu(self.bn2_1(self.c2_1(h)))
         h = F.leaky_relu(self.bn3_0(self.c3_0(h)))
         return self.l4(h)
+
+class Filter(chainer.Chain):
+    def __init__(self, wscale=0.02):
+        w = chainer.initializers.Normal(wscale)
+        super(Filter, self).__init__()
+        with self.init_scope():
+            self.c0_0 = L.Convolution2D(3, 3, 1, 1, 0, nobias=True, initialW=w)
+
+    def __call__(self, x):
+        h = self.c0_0(x)
+        return h
+

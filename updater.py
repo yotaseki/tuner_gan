@@ -14,18 +14,24 @@ class Updater(chainer.training.StandardUpdater):
         gen_optimizer = self.get_optimizer('opt_gen')
         dis_optimizer = self.get_optimizer('opt_dis')
         xp = self.gen.xp
-
+        
         batch = self.get_iterator('main').next()
+        print(np.array(batch[0][1]).shape)
         batchsize = len(batch)
-        x = []
+        xr = []
+        xf = []
         for i in range(batchsize):
-            x.append(np.asarray(batch[i][0]).astype("f"))
-        x_real = Variable(xp.asarray(x))
+            print(i)
+            xr.append(np.asarray(batch[i][1]).astype("f"))
+            xf.append(np.asarray(batch[i][0]).astype("f"))
 
+        x_real = Variable(xp.asarray(xr))
         y_real = self.dis(x_real)
 
-        z = Variable(xp.asarray(self.gen.make_hidden(batchsize)))
-        x_fake = self.gen(z)
+        #z = Variable(xp.asarray(self.gen.make_hidden(batchsize)))
+        #x_fake = self.gen(z)
+        x_fv = Variable(xp.asarray(xf))
+        x_fake = self.gen(x_fv)
         y_fake = self.dis(x_fake)
 
         loss_dis = F.sum(F.softplus(-y_real)) / batchsize

@@ -3,13 +3,15 @@ import os
 import sys
 
 import numpy as np
+from PIL import Image
 import chainer
+import chainer.functions as F
 from chainer import training,datasets, iterators
 from chainer.training import extension
 from chainer.training import extensions
 
 from updater import Updater
-from net import Discriminator,Generator
+from net import Discriminator,Generator,Filter
 from evaluation import sample_generate, sample_generate_light
 #from record import record_setting
 
@@ -19,16 +21,40 @@ def setup_adam_optimizer(model):
     optimizer.setup(model)
     return optimizer
 
+def make_data(img_path):
+    img = Image.open(img_path)
+    imgArray = np.asarray(img)
+    imgArray.flags.writeable = True
+    data = np.float32(imgArray)/255.0
+    data = F.transpose(data)
+    return data
+
+def make_dataset(traintxt):
+    dataset = []
+    data = open(traintxt)
+    for line in data:
+        simu, real = line.split()
+        #print(simu)
+        #print(real)
+        s_data = make_data(simu)
+        r_data = make_data(real)
+        dataset.append([s_data, r_data])
+    return dataset
+
 def main():
     gpu_id = 0
     batchsize = 10
     report_keys = ["loss_dis", "loss_gen"]
     
-    train_dataset = datasets.LabeledImageDataset(str(argv[1]))
+    #train_dataset = datasets.LabeledImageDataset(str(argv[1]))
+    train_dataset = make_dataset(argv[1])
     train_iter = iterators.SerialIterator(train_dataset,batchsize)
+    print(np.array(train_dataset[0][1]).shape)
+    #print(np.array(train_dataset[1]).shape)
     
     models = []
-    generator = Generator()
+    #generator = Generator()
+    generator = Filter()
     discriminator = Discriminator()
     opts = {}
     opts["opt_gen"] = setup_adam_optimizer(generator)
