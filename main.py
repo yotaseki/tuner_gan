@@ -12,7 +12,7 @@ from chainer.training import extensions
 
 from updater import Updater
 from net import Discriminator,Generator,Filter
-from evaluation import sample_generate, sample_generate_light
+from evaluation import sample_filter,sample_generate, sample_generate_light
 #from record import record_setting
 
 
@@ -47,9 +47,12 @@ def main():
     report_keys = ["loss_dis", "loss_gen"]
     
     #train_dataset = datasets.LabeledImageDataset(str(argv[1]))
-    train_dataset = make_dataset(argv[1])
-    train_iter = iterators.SerialIterator(train_dataset,batchsize)
-    print(np.array(train_dataset[0][1]).shape)
+    black_dataset = datasets.ImageDataset(argv[1])
+    white_dataset = datasets.ImageDataset(argv[2])
+    #train_dataset = make_dataset(argv[1])
+    black_iter = iterators.SerialIterator(black_dataset,batchsize)
+    white_iter = iterators.SerialIterator(white_dataset,batchsize)
+    #print(np.array(train_dataset[0][1]).shape)
     #print(np.array(train_dataset[1]).shape)
     
     models = []
@@ -65,21 +68,23 @@ def main():
     for m in models:
         m.to_gpu()
     updater_args = {
-        "iterator": {'main': train_iter},
+        "iterator": {'main': black_iter, 'label': white_iter},
         "device": gpu_id,
         "optimizer": opts,
         "models": models
     }
     output = 'result'
-    display_interval = 20
-    evaluation_interval = 1000
-    max_iter = 10000
+    display_interval = 5
+    evaluation_interval = 10
+    max_iter = 400
     
+    x = []
+    x.append(black_dataset[0])
     updater = Updater(**updater_args)
     trainer = training.Trainer(updater, (max_iter, 'iteration'), out=output)
     trainer.extend(extensions.LogReport(keys=report_keys,trigger=(display_interval, 'iteration')))
     trainer.extend(extensions.PrintReport(report_keys), trigger=(display_interval, 'iteration'))
-    trainer.extend(sample_generate(generator, output), trigger=(evaluation_interval, 'iteration'), priority=extension.PRIORITY_WRITER)
+    trainer.extend(sample_filter(generator, x, output), trigger=(evaluation_interval, 'iteration'), priority=extension.PRIORITY_WRITER)
     trainer.run()
 
 if __name__ == '__main__':

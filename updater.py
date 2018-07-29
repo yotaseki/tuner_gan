@@ -15,15 +15,14 @@ class Updater(chainer.training.StandardUpdater):
         dis_optimizer = self.get_optimizer('opt_dis')
         xp = self.gen.xp
         
-        batch = self.get_iterator('main').next()
-        print(np.array(batch[0][1]).shape)
-        batchsize = len(batch)
+        black_batch = self.get_iterator('main').next()
+        white_batch = self.get_iterator('label').next()
+        batchsize = len(black_batch)
         xr = []
         xf = []
         for i in range(batchsize):
-            print(i)
-            xr.append(np.asarray(batch[i][1]).astype("f"))
-            xf.append(np.asarray(batch[i][0]).astype("f"))
+            xf.append(np.asarray(black_batch[i]).astype("f"))
+            xr.append(np.asarray(white_batch[i]).astype("f"))
 
         x_real = Variable(xp.asarray(xr))
         y_real = self.dis(x_real)
