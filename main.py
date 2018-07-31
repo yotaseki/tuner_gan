@@ -74,9 +74,9 @@ def main():
         "models": models
     }
     output = 'result'
-    display_interval = 5
-    evaluation_interval = 10
-    max_iter = 400
+    display_interval = 10
+    evaluation_interval = 20
+    max_iter = 500
     
     x = []
     x.append(black_dataset[0])

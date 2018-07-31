@@ -56,7 +56,7 @@ def sample_filter(gen, src, dst, rows=10, cols=10, seed=0):
         y = to_cpu(y.array)
         #print(y)
         y = y[0]
-        y = np.array(np.clip(y * 127.5 + 127.5, 0.0, 255.0), dtype=np.uint8)
+        y = np.array(np.clip(y * 255.0, 0.0, 255.0), dtype=np.uint8)
         _, H, W = y.shape
         y = F.transpose(y)
         im = Image.fromarray(y.data)
