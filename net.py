@@ -90,9 +90,28 @@ class Filter(chainer.Chain):
         w = chainer.initializers.Normal(wscale)
         super(Filter, self).__init__()
         with self.init_scope():
-            self.c0_0 = L.Convolution2D(3, 3, 1, 1, 0, nobias=True, initialW=w)
+            self.c0_0 = L.Convolution2D(3, 3, 1, 1, 0, initialW=w)
 
     def __call__(self, x):
         h = self.c0_0(x)
         return h
 
+class SimulatedGenerator(chianer.Chain):
+    def __init__(self, wscale=0.02):
+        w = chainer.initializers.Normal(wscale)
+        super(Filter, self).__init__()
+        with self.init_scope():
+            self.c0_0 = GainLayer()
+    
+    def GainLayer():
+        return L.Convolution2D(3, 3, 1, 1, 0, initialW=w)
+
+    def BlurLayer():
+        pass
+
+    def WearOutLayer():
+        pass
+
+    def __call__(self, x):
+        h = self.c0_0(x)
+        return h
